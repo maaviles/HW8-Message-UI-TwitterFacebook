@@ -7,8 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Social/Social.h>
+#import <MessageUI/MessageUI.h>
 
-@interface MACViewController : UIViewController
+@interface MACViewController : UIViewController <MFMailComposeViewControllerDelegate>
+
+
+- (IBAction)postToTwitter:(id)sender;
+- (IBAction)postToFacebook:(id)sender;
+- (IBAction)showEmail:(id)sender;
+
 
 
 

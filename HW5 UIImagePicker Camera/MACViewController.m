@@ -8,6 +8,7 @@
 
 #import "MACViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import <Social/Social.h>
 
 @interface MACViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
@@ -95,6 +96,7 @@
 - (void)applyFilterToImage:(UIImage *)image {
 
 // filter the image
+    // need to play around with this more
 CIContext *context = [CIContext contextWithOptions:nil];
 
 CIImage *ciImage = [CIImage imageWithCGImage:image.CGImage];
@@ -112,7 +114,7 @@ CGImageRef cgImage = [context createCGImage:result fromRect:extent];
 UIImage *filteredImage = [UIImage imageWithCGImage:cgImage];
 
     
-// show the image to the user
+// show the imageView window
 UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 320)];
 [imageView setImage:filteredImage];
 [self.view addSubview:imageView];
@@ -144,4 +146,66 @@ UIImageWriteToSavedPhotosAlbum(filteredImage, self, @selector(image:didFinishSav
         NSLog(@"Saved Image to Camera Roll");
     }
 }
+- (IBAction)postToTwitter:(id)sender {
+    if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter])
+    {
+        SLComposeViewController *tweetSheet = [SLComposeViewController
+                                               composeViewControllerForServiceType:SLServiceTypeTwitter];
+        [tweetSheet setInitialText:@"Check out my photo!"];
+        [self presentViewController:tweetSheet animated:YES completion:nil];
+    }
+}
+
+- (IBAction)postToFacebook:(id)sender {
+    if([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
+        SLComposeViewController *controller = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
+        
+        [controller setInitialText:@"Check out my photo!"];
+        [self presentViewController:controller animated:YES completion:Nil];
+    }
+}
+
+- (IBAction)showEmail:(id)sender {
+    // Email Subject
+    NSString *emailTitle = @"Look at my pic!";
+    // Email Content
+    NSString *messageBody = @"I just took this pic with my new app!";
+    // To address
+    NSArray *toRecipents = [NSArray arrayWithObject:@"mce.aviles@gmail.com"];
+    
+    MFMailComposeViewController *mc = [[MFMailComposeViewController alloc] init];
+    mc.mailComposeDelegate = self;
+    [mc setSubject:emailTitle];
+    [mc setMessageBody:messageBody isHTML:NO];
+    [mc setToRecipients:toRecipents];
+    
+    // Present mail view controller on screen
+    [self presentViewController:mc animated:YES completion:NULL];
+}
+
+- (void) mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+    switch (result)
+    {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail cancelled");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail saved");
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Mail sent");
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Mail sent failure: %@", [error localizedDescription]);
+            break;
+        default:
+            break;
+    }
+    
+    // Close the Mail Interface
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+
 @end
